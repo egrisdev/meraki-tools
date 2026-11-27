@@ -1,6 +1,6 @@
 # The notebook, its charts, and the PDF or HTML export. Not needed on a machine that only collects.
 -r requirements.txt
-matplotlib>=3.8
-pandas>=2.1
-notebook>=7.0
-nbconvert[webpdf]>=7.16.5
+matplotlib>=3.11.2
+pandas>=3.1.1
+notebook>=7.6.5
+nbconvert[webpdf]>=7.17.2
