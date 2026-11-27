@@ -1,0 +1,20 @@
+# Dependabot checks for new versions once a week and opens one pull request for each group.
+# The Build workflow runs on it; merge it if the build passes.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directory: /wan-stats
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      wan-stats:
+        patterns: ["*"]
