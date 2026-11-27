@@ -1,0 +1,66 @@
+name: Build
+
+# Every push and pull request: run each tool's tests.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  wan-stats:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.13']
+    # The storage tests run against all three databases. SQLite needs no service.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wan_stats_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      mongodb:
+        image: mongo:8
+        ports: ['27017:27017']
+    env:
+      WAN_STATS_TEST_POSTGRES: postgresql://postgres:postgres@localhost:5432/wan_stats_test
+      WAN_STATS_TEST_MONGODB: mongodb://localhost:27017/wan_stats_test
+    defaults:
+      run:
+        working-directory: wan-stats
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install
+        run: pip install -r requirements-dev.txt
+
+      - name: Test
+        run: python -m pytest tests -rs
+
+      # The scripts and the notebook, end to end, on invented data.
+      - name: Run the reports on the demo data
+        run: |
+          python demo.py --days 120
+          python report.py --db sqlite:///demo.sqlite || [ $? -le 2 ]
+          python validate.py --db sqlite:///demo.sqlite
+          WAN_STATS_DB=sqlite:///demo.sqlite jupyter nbconvert --to html --no-input --execute wan-stats.ipynb --output-dir "$RUNNER_TEMP"
+
+  # The one check that branch protection requires. It passes only if every job above did.
+  build:
+    if: always()
+    needs: [wan-stats]
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.wan-stats.result }}" = "success"

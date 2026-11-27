@@ -1,0 +1,25 @@
+# Secrets and local settings
+.env
+
+# Databases, logs and reports made by running the tools
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.log
+*.bson
+*.zip
+wan-stats/wan-stats.pdf
+wan-stats/wan-stats.html
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local notes
+.claude/
+CLAUDE.md

@@ -1,0 +1,23 @@
+# Dependabot checks for new versions once a week and opens one pull request for each group.
+# The Build workflow runs on it; merge it if the build passes.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+  # The requirements files name the oldest version each tool works with. They are raised only when
+  # a newer version is needed, for example for a security fix, not every time one is released.
+  - package-ecosystem: pip
+    directory: /wan-stats
+    versioning-strategy: increase-if-necessary
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      wan-stats:
+        patterns: ["*"]
